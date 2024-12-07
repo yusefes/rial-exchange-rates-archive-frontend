@@ -54,10 +54,11 @@ onMounted(async () => {
       </div>
 
       <div v-else class="space-y-8">
-        <div class="bg-white rounded-lg shadow-md p-6 space-y-6">
-          <h2 class="text-xl font-semibold mb-4">Select Date Range</h2>
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <h2 class="text-xl font-semibold mb-2">Select Date Range</h2>
           <DateRangeSelector v-model:dateRange="selectedDateRange" :valid-date-range="validDataRange" :selected-date-range="selectedDateRange" />
-          <h2 class="text-xl font-semibold">Select Currencies</h2>
+          <div class="mb-4"/>
+          <h2 class="text-xl font-semibold mb-2">Select Currencies</h2>
           <CurrencySelector v-model:selectedCurrencies="selectedCurrencies"/>
         </div>
 

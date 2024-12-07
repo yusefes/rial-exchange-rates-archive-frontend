@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {defineEmits, onMounted, ref} from 'vue';
+import {onMounted, ref} from 'vue';
 import {subDays, subMonths, subYears} from 'date-fns';
 import {DateRange} from "../types/exchange.ts";
 import VueDatePicker from '@vuepic/vue-datepicker';
