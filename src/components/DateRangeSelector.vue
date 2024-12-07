@@ -16,24 +16,37 @@ const props = defineProps({
   },
 });
 
-const presets = [
+const presetDates = ref([
   {
     label: 'Last 7 days',
-    range: () => ({start: subDays(props.validDateRange.end, 7), end: props.validDateRange.end}),
+    value: [subDays(props.validDateRange.end, 7), props.validDateRange.end]
+  },
+  {
+    label: 'Last 14 days',
+    value: [subDays(props.validDateRange.end, 14), props.validDateRange.end]
   },
   {
     label: 'Last 30 days',
-    range: () => ({start: subDays(props.validDateRange.end, 30), end: props.validDateRange.end}),
+    value: [subDays(props.validDateRange.end, 30), props.validDateRange.end]
   },
   {
     label: 'Last 3 months',
-    range: () => ({start: subMonths(props.validDateRange.end, 3), end: props.validDateRange.end}),
+    value: [subMonths(props.validDateRange.end, 3), props.validDateRange.end]
+  },
+  {
+    label: 'Last 6 months',
+    value: [subMonths(props.validDateRange.end, 6), props.validDateRange.end]
   },
   {
     label: 'Last year',
-    range: () => ({start: subYears(props.validDateRange.end, 1), end: props.validDateRange.end}),
+    value: [subYears(props.validDateRange.end, 1), props.validDateRange.end]
   },
-];
+  {
+    label: 'All time',
+    value: [props.validDateRange.start, props.validDateRange.end]
+  },
+]);
+
 
 const dateRange = ref<[Date, Date]>([new Date(), new Date()]);
 
@@ -50,12 +63,6 @@ function applyDateRange() {
   }
 }
 
-function applyPreset(preset: typeof presets[0]) {
-  const range = preset.range();
-  dateRange.value = [range.start, range.end];
-  applyDateRange();
-}
-
 onMounted(() => {
   if (props.selectedDateRange) {
     dateRange.value = [props.selectedDateRange.start, props.selectedDateRange.end];
@@ -64,28 +71,17 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="space-y-4">
-    <div class="flex space-x-4">
-      <VueDatePicker
-          v-model="dateRange"
-          :min-date="props.validDateRange.start"
-          :max-date="props.validDateRange.end"
-          :enable-time-picker="false"
-          :format="formatDateOutput"
-          :auto-apply="true"
-          range multi-calendars
-          class="rounded"
-          @change="applyDateRange"
-      />
-
-      <div v-for="preset in presets" :key="preset.label">
-        <button
-            @click="applyPreset(preset)"
-            class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-        >
-          {{ preset.label }}
-        </button>
-      </div>
-    </div>
+  <div class="flex space-y-4 space-x-4">
+    <VueDatePicker
+        v-model="dateRange"
+        :min-date="props.validDateRange.start"
+        :max-date="props.validDateRange.end"
+        :enable-time-picker="false"
+        :format="formatDateOutput"
+        :auto-apply="true"
+        :preset-dates="presetDates"
+        range multi-calendars
+        class="rounded"
+        @update:model-value="applyDateRange"/>
   </div>
 </template>
