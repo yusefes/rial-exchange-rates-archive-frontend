@@ -1,18 +1,18 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
-import { Line } from 'vue-chartjs';
+import {computed} from 'vue';
+import {Line} from 'vue-chartjs';
 import {
-  Chart as ChartJS,
   CategoryScale,
+  Chart as ChartJS,
+  Legend,
   LinearScale,
-  PointElement,
   LineElement,
+  PointElement,
   Title,
-  Tooltip,
-  Legend
+  Tooltip
 } from 'chart.js';
-import { ExchangeRatesData } from '../types/exchange';
-import { CURRENCIES } from '../constants/currencies';
+import {DateRange, ExchangeRatesData} from '../types/exchange';
+import {CURRENCIES} from '../constants/currencies';
 
 ChartJS.register(
   CategoryScale,
@@ -27,7 +27,7 @@ ChartJS.register(
 const props = defineProps<{
   data: ExchangeRatesData;
   selectedCurrencies: string[];
-  dateRange: { start: Date; end: Date };
+  dateRange: DateRange;
 }>();
 
 const chartData = computed(() => {
@@ -40,13 +40,27 @@ const chartData = computed(() => {
 
   return {
     labels: dates,
-    datasets: props.selectedCurrencies.map(currency => ({
-      label: `${CURRENCIES[currency]?.flag || ''} ${currency.toUpperCase()}`,
-      data: dates.map(date => props.data[date]?.[currency]?.sell || null),
-      borderColor: `#${Math.floor(Math.random()*16777215).toString(16)}`,
-      fill: false,
-      tension: 0.1
-    }))
+    datasets: props.selectedCurrencies.map(currency => {
+      const currencyData = CURRENCIES[currency];
+      // background color with alpha
+      const alpha = 0.5;
+      const hex = currencyData.color.substring(1);
+      const rgb = {
+        r: parseInt(hex.substring(0, 2), 16),
+        g: parseInt(hex.substring(2, 4), 16),
+        b: parseInt(hex.substring(4, 6), 16),
+      };
+      const backgroundColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
+      return {
+        label: `${currencyData?.flag || ''} ${currency.toUpperCase()}`,
+        data: dates.map(date => props.data[date]?.[currency]?.sell || null),
+        backgroundColor: backgroundColor,
+        borderColor: currencyData.color,
+        fill: true,
+        tension: 0,
+        borderWidth: 2.3,
+      };
+    }),
   };
 });
 
@@ -57,16 +71,17 @@ const chartOptions = {
     legend: {
       position: 'top' as const,
     },
-    title: {
-      display: true,
-      text: 'Rial Exchange Rates'
-    }
   },
   scales: {
     y: {
-      beginAtZero: false
+      beginAtZero: false,
     }
-  }
+  },
+  interaction: {
+    mode: 'nearest',
+    axis: 'x',
+    intersect: false,
+  },
 };
 </script>
 

@@ -5,7 +5,7 @@ import Multiselect from 'vue-multiselect';
 
 const emit = defineEmits(['update:selectedCurrencies']);
 
-const selectedCurrencies = ref<string[]>([]);
+const selectedCurrencies = ref<any[]>([]);
 const currencies = Object.entries(CURRENCIES).map(([code, details]) => ({
   code: code,
   label: `${details.flag || ''} ${details.name} (${code.toUpperCase()})`,
