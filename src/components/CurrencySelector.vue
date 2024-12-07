@@ -7,13 +7,13 @@ const emit = defineEmits(['update:selectedCurrencies']);
 
 const selectedCurrencies = ref<string[]>([]);
 const currencies = Object.entries(CURRENCIES).map(([code, details]) => ({
-  code,
+  code: code,
   label: `${details.flag || ''} ${details.name} (${code.toUpperCase()})`,
 }));
 
-function updateSelection(value: any[]) {
-  selectedCurrencies.value = value.map(v => v.code);
-  emit('update:selectedCurrencies', selectedCurrencies.value);
+function updateSelection(values: any[]) {
+  selectedCurrencies.value = values;
+  emit('update:selectedCurrencies', values.map(v => v.code));
 }
 </script>
 
