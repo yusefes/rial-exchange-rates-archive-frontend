@@ -123,6 +123,13 @@ const chartOptions = computed(() => {
       legend: {
         display: true,
         position: 'top',
+        labels: {
+          boxWidth: 30,
+          boxHeight: 10,
+          font: {
+            weight: 'bold',
+          },
+        },
       },
       tooltip: {
         enabled: true,
