@@ -3,6 +3,7 @@ import {onMounted, ref} from 'vue';
 import {subDays, subMonths, subYears} from 'date-fns';
 import {DateRange} from "../types/exchange.ts";
 import VueDatePicker from '@vuepic/vue-datepicker';
+import {formatDate} from "../utils/utils.ts";
 
 const emit = defineEmits(['update:dateRange']);
 const props = defineProps({
@@ -47,12 +48,8 @@ const presetDates = ref([
   },
 ]);
 
-
 const dateRange = ref<[Date, Date]>([new Date(), new Date()]);
-
-function formatDateOutput(date: Date[]) {
-  return date.map(d => d.getFullYear() + '/' + d.getMonth() + '/' + d.getDate()).join(' - ');
-}
+const formatDateOutput = (date: Date[]) => date.map(formatDate).join(' - ');
 
 function applyDateRange() {
   if (dateRange.value[0] && dateRange.value[1]) {

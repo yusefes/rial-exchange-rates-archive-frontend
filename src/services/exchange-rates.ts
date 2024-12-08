@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { ExchangeRatesData } from '../types/exchange.ts';
-import {parseDate} from "./utils.ts";
+import {parseDate} from "../utils/utils.ts";
 
 const API_URL = 'https://raw.githubusercontent.com/SamadiPour/rial-exchange-rates-archive/refs/heads/data/gregorian_all.min.json';
 
