@@ -17,6 +17,7 @@ import {DateRange, ExchangeRatesData} from '../types/exchange';
 import {CURRENCIES} from '../constants/currencies';
 import {hexToRGBA} from "../utils/utils.ts";
 import {verticalHoverLine} from "../utils/chart-plugins.ts";
+import 'chartjs-adapter-date-fns';
 
 ChartJS.register(
     LineElement,
@@ -38,24 +39,23 @@ const props = defineProps<{
 }>();
 
 const filteredDates = computed(() => {
-  return Object.keys(props.data)
-      .filter(date => {
-        const currentDate = new Date(date);
-        return currentDate >= props.dateRange.start && currentDate <= props.dateRange.end;
-      })
-      .sort();
+  return Object.entries(props.data)
+      .map(([key, _]) => ({key, date: new Date(key)}))
+      .filter(({date}) => {
+        return date >= props.dateRange.start && date <= props.dateRange.end;
+      });
 });
 
 const chartData = computed(() => {
   return {
-    labels: filteredDates.value,
+    labels: filteredDates.value.map(({date}) => date),
     datasets: props.selectedCurrencies.map(currency => {
       const lastMonthRange = (props.dateRange.end.getTime() - props.dateRange.start.getTime()) / (1000 * 60 * 60 * 24) <= 31;
       const currencyData = CURRENCIES[currency];
 
       return {
         label: `${currencyData?.flag || ''} ${currency.toUpperCase()}`,
-        data: filteredDates.value.map(date => props.data[date]?.[currency]?.sell || null),
+        data: filteredDates.value.map(date => props.data[date.key]?.[currency]?.sell || null),
         backgroundColor: hexToRGBA(currencyData.color, 0.5),
         borderColor: currencyData.color,
         fill: false,
@@ -71,17 +71,46 @@ const chartData = computed(() => {
 });
 
 const chartOptions = computed(() => {
+  // more than 6 months
+  const isLongTerm = (props.dateRange.end.getTime() - props.dateRange.start.getTime()) / (1000 * 60 * 60 * 24) > 180;
+
   return {
     responsive: true,
     maintainAspectRatio: false,
     scales: {
       x: {
+        type: 'time',
+        time: {
+          tooltipFormat: 'yyyy-MM-dd',
+          unit: isLongTerm ? undefined : 'day',
+          displayFormats: {
+            second: 'dd MMM',
+            minute: 'dd MMM',
+            hour: 'dd MMM',
+            day: 'dd MMM',
+            month: 'MMM yyyy',
+            year: 'yyyy'
+          }
+        },
         grid: {
           display: false,
         },
         title: {
           display: false,
           text: 'Date',
+        },
+        ticks: {
+          maxTicksLimit: 15,
+          major: {
+            enabled: true
+          },
+          font: function(context: any) {
+            if (context.tick && context.tick.major) {
+              return {
+                weight: 'bold',
+              };
+            }
+          }
         },
       },
       y: {
