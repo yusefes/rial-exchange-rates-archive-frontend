@@ -104,7 +104,7 @@ const chartOptions = computed(() => {
           major: {
             enabled: true
           },
-          font: function(context: any) {
+          font: function (context: any) {
             if (context.tick && context.tick.major) {
               return {
                 weight: 'bold',
@@ -174,7 +174,7 @@ const chartOptions = computed(() => {
         id="canvas"
         v-if="chartData.datasets.length > 0"
         :data="chartData"
-        :options="chartOptions"
+        :options="(chartOptions as any)"
         aria-label="Exchange rate chart"
         role="img"
     />
