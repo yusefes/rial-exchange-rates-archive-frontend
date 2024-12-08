@@ -15,7 +15,8 @@ import {
 } from 'chart.js';
 import {DateRange, ExchangeRatesData} from '../types/exchange';
 import {CURRENCIES} from '../constants/currencies';
-import {hexToRGBA} from "../services/utils.ts";
+import {hexToRGBA} from "../utils/utils.ts";
+import {verticalHoverLine} from "../utils/chart-plugins.ts";
 
 ChartJS.register(
     LineElement,
@@ -26,28 +27,9 @@ ChartJS.register(
     Title,
     Tooltip,
     Legend,
-    Filler
+    Filler,
+    verticalHoverLine,
 );
-
-const verticalHoverLine = {
-  id: 'verticalHoverLine',
-  beforeDatasetsDraw(chart: any, args: any, plugins: any) {
-    const {ctx, chartArea: {top, bottom, height}} = chart;
-    ctx.save();
-    chart.getDatasetMeta(0).data.forEach((dataPoint: any, index: any) => {
-      if (dataPoint.active === true) {
-        ctx.beginPath();
-        ctx.strokeStyle = '#d3d3d3';
-        ctx.setLineDash([5, 5]);
-        ctx.moveTo(dataPoint.x, top);
-        ctx.lineTo(dataPoint.x, bottom);
-        ctx.stroke();
-      }
-    })
-    ctx.restore()
-  }
-}
-ChartJS.register(verticalHoverLine);
 
 const props = defineProps<{
   data: ExchangeRatesData;
@@ -79,7 +61,8 @@ const chartData = computed(() => {
         fill: false,
         tension: 0,
         borderWidth: 2.3,
-        pointRadius: lastMonthRange ? 4 : 0,
+        pointRadius: lastMonthRange ? 3 : 0,
+        pointBackgroundColor: currencyData.color,
         pointHoverRadius: lastMonthRange ? 6 : 4,
         pointHoverBackgroundColor: currencyData.color,
       };
@@ -94,10 +77,10 @@ const chartOptions = computed(() => {
     scales: {
       x: {
         grid: {
-          display: false, // Disable vertical grid lines
+          display: false,
         },
         title: {
-          display: true,
+          display: false,
           text: 'Date',
         },
       },
@@ -113,9 +96,28 @@ const chartOptions = computed(() => {
         position: 'top',
       },
       tooltip: {
+        enabled: true,
         mode: 'index',
         position: 'nearest',
         intersect: false,
+        // box itself
+        backgroundColor: '#ffffff',
+        titleColor: '#333',
+        bodyColor: '#666',
+        padding: 12,
+        bodySpacing: 6,
+        titleMarginBottom: 8,
+        // caret - the arrow pointing to the hovered point
+        caretSize: 0,
+        caretPadding: 12,
+        // border
+        borderColor: '#ddd',
+        borderWidth: 1.4,
+        // color box style
+        displayColors: true,
+        boxPadding: 6,
+        boxWidth: 12,
+        boxHeight: 6,
       },
       title: {
         display: false,
