@@ -178,10 +178,11 @@ const chartOptions = computed(() => {
           label: props.roiEnabled ? function (tooltipItem: any) {
             const dataset = tooltipItem.dataset;
             const index = tooltipItem.dataIndex;
-            const normalizedValue = dataset.data[index] as number;
+            const roiValue = dataset.data[index] as number;
             const realValue = props.data[filteredDates.value[index].key]?.[dataset.key]?.sell;
-            const showValue = realValue !== undefined ? realValue : normalizedValue;
-            return `${dataset.label}: ${showValue.toLocaleString('en-US', {minimumFractionDigits: 0})}`;
+            const showValue = realValue !== undefined ? realValue : roiValue;
+
+            return `${dataset.label}: ${showValue.toLocaleString('en-US', {minimumFractionDigits: 0})} - ${roiValue.toFixed(2)}% ${roiValue > 0 ? '↑' : '↓'}`;
           } : undefined,
         }
       },
