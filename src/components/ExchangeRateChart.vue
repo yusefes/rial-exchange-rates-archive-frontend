@@ -36,6 +36,7 @@ const props = defineProps<{
   data: ExchangeRatesData;
   selectedCurrencies: string[];
   dateRange: DateRange;
+  roiEnabled: boolean;
 }>();
 
 const filteredDates = computed(() => {
@@ -47,28 +48,42 @@ const filteredDates = computed(() => {
 });
 
 const chartData = computed(() => {
+  const datasets = props.selectedCurrencies.map(currency => {
+    const lastMonthRange = (props.dateRange.end.getTime() - props.dateRange.start.getTime()) / (1000 * 60 * 60 * 24) <= 31;
+    const currencyData = CURRENCIES[currency];
+    const data = filteredDates.value.map(date => props.data[date.key]?.[currency]?.sell || null);
+
+    return {
+      label: `${currencyData?.flag || ''} ${currency.toUpperCase()}`,
+      data: props.roiEnabled ? calculateRio(data) : data,
+      key: currency,
+      backgroundColor: hexToRGBA(currencyData.color, 0.5),
+      borderColor: currencyData.color,
+      fill: false,
+      tension: 0,
+      borderWidth: 2.3,
+      pointRadius: lastMonthRange ? 3 : 0,
+      pointBackgroundColor: currencyData.color,
+      pointHoverRadius: lastMonthRange ? 6 : 4,
+      pointHoverBackgroundColor: currencyData.color,
+    };
+  });
+
   return {
     labels: filteredDates.value.map(({date}) => date),
-    datasets: props.selectedCurrencies.map(currency => {
-      const lastMonthRange = (props.dateRange.end.getTime() - props.dateRange.start.getTime()) / (1000 * 60 * 60 * 24) <= 31;
-      const currencyData = CURRENCIES[currency];
-
-      return {
-        label: `${currencyData?.flag || ''} ${currency.toUpperCase()}`,
-        data: filteredDates.value.map(date => props.data[date.key]?.[currency]?.sell || null),
-        backgroundColor: hexToRGBA(currencyData.color, 0.5),
-        borderColor: currencyData.color,
-        fill: false,
-        tension: 0,
-        borderWidth: 2.3,
-        pointRadius: lastMonthRange ? 3 : 0,
-        pointBackgroundColor: currencyData.color,
-        pointHoverRadius: lastMonthRange ? 6 : 4,
-        pointHoverBackgroundColor: currencyData.color,
-      };
-    }),
+    datasets: datasets,
   };
 });
+
+function calculateRio(data: (number | null)[]): (number | null)[] {
+  const firstValue = data.find(value => value !== null);
+  return data.map((value) => {
+    if (value === null) {
+      return null;
+    }
+    return firstValue !== undefined ? (value - firstValue) / firstValue * 100 : null;
+  });
+}
 
 const chartOptions = computed(() => {
   // more than 6 months
@@ -117,6 +132,11 @@ const chartOptions = computed(() => {
         grid: {
           drawBorder: false,
         },
+        ticks: {
+          callback: props.roiEnabled ? function (value: number) {
+            return `${value}%`;
+          } : undefined,
+        }
       },
     },
     plugins: {
@@ -154,6 +174,16 @@ const chartOptions = computed(() => {
         boxPadding: 6,
         boxWidth: 12,
         boxHeight: 6,
+        callbacks: {
+          label: props.roiEnabled ? function (tooltipItem: any) {
+            const dataset = tooltipItem.dataset;
+            const index = tooltipItem.dataIndex;
+            const normalizedValue = dataset.data[index] as number;
+            const realValue = props.data[filteredDates.value[index].key]?.[dataset.key]?.sell;
+            const showValue = realValue !== undefined ? realValue : normalizedValue;
+            return `${dataset.label}: ${showValue.toLocaleString('en-US', {minimumFractionDigits: 0})}`;
+          } : undefined,
+        }
       },
       title: {
         display: false,

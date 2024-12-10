@@ -14,6 +14,7 @@ const selectedCurrencies = ref<string[]>([]);
 const selectedDateRange = ref<DateRange>({start: new Date(), end: new Date()});
 const loading = ref(true);
 const error = ref<string | null>(null);
+const roiEnabled = ref(false);
 
 onMounted(async () => {
   try {
@@ -59,7 +60,16 @@ onMounted(async () => {
           <DateRangeSelector v-model:dateRange="selectedDateRange" :valid-date-range="validDataRange" :selected-date-range="selectedDateRange" />
           <div class="mb-4"/>
           <h2 class="text-xl font-semibold mb-2">Select Currencies</h2>
-          <CurrencySelector v-model:selectedCurrencies="selectedCurrencies"/>
+          <div class="flex items-center space-x-4">
+            <div class="flex-1">
+              <CurrencySelector v-model:selectedCurrencies="selectedCurrencies"/>
+            </div>
+            <label class="inline-flex items-center cursor-pointer">
+              <input type="checkbox" v-model="roiEnabled" class="sr-only peer">
+              <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer  peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+              <span class="ms-3 text-sm font-medium">ROI Mode</span>
+            </label>
+          </div>
         </div>
 
         <div class="bg-white p-6 rounded-lg shadow">
@@ -67,6 +77,7 @@ onMounted(async () => {
               :data="exchangeRates"
               :selected-currencies="selectedCurrencies"
               :date-range="selectedDateRange"
+              :roi-enabled="roiEnabled"
           />
         </div>
       </div>
