@@ -43,6 +43,18 @@ const presetDates = ref([
     value: [subYears(props.validDateRange.end, 1), props.validDateRange.end]
   },
   {
+    label: 'Last 2 years',
+    value: [subYears(props.validDateRange.end, 2), props.validDateRange.end]
+  },
+  {
+    label: 'Last 3 years',
+    value: [subYears(props.validDateRange.end, 3), props.validDateRange.end]
+  },
+  {
+    label: 'Last 5 years',
+    value: [subYears(props.validDateRange.end, 5), props.validDateRange.end]
+  },
+  {
     label: 'All time',
     value: [props.validDateRange.start, props.validDateRange.end]
   },

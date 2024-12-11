@@ -1,4 +1,5 @@
 import {parse} from 'date-fns';
+import {JalaliDateTime} from 'jalali-date-time';
 
 // use only for YYYY/MM/DD
 export function parseDate(input: string): Date {
@@ -20,4 +21,20 @@ export function hexToRGBA(hex: string, alpha: number): string {
     b: parseInt(hex.substring(4, 6), 16),
   };
   return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
+}
+
+export function parseDateHijri(input: string): Date {
+  const { toGregorian } = JalaliDateTime();
+  const [year, month, day] = input.split('/').map(Number);
+  const { gy, gm, gd } = toGregorian({ jy: year, jm: month, jd: day });
+  return new Date(gy, gm - 1, gd);
+}
+
+export function formatDateHijri(date: Date): string {
+  const { toJalali } = JalaliDateTime();
+  const { jy, jm, jd } = toJalali({ gy: date.getFullYear(), gm: date.getMonth() + 1, gd: date.getDate() });
+  const year = jy.toString().padStart(4, '0');
+  const month = jm.toString().padStart(2, '0');
+  const day = jd.toString().padStart(2, '0');
+  return `${year}/${month}/${day}`;
 }
