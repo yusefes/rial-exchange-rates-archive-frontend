@@ -15,7 +15,7 @@ import {
 } from 'chart.js';
 import {DateRange, ExchangeRatesData} from '../types/exchange';
 import {CURRENCIES} from '../constants/currencies';
-import {hexToRGBA} from "../utils/utils.ts";
+import {hexToRGBA, parseDate, parseDateHijri} from "../utils/utils.ts";
 import {verticalHoverLine} from "../utils/chart-plugins.ts";
 import 'chartjs-adapter-date-fns';
 
@@ -37,11 +37,15 @@ const props = defineProps<{
   selectedCurrencies: string[];
   dateRange: DateRange;
   roiEnabled: boolean;
+  calendarType: string;
 }>();
 
 const filteredDates = computed(() => {
   return Object.entries(props.data)
-      .map(([key, _]) => ({key, date: new Date(key)}))
+      .map(([key, _]) => ({
+        key,
+        date: props.calendarType === 'gregorian' ? parseDate(key) : parseDateHijri(key)
+      }))
       .filter(({date}) => {
         return date >= props.dateRange.start && date <= props.dateRange.end;
       });
