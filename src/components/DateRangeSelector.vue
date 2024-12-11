@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import {onMounted, ref} from 'vue';
+import {onMounted, ref, watch} from 'vue';
 import {subDays, subMonths, subYears} from 'date-fns';
 import {DateRange} from "../types/exchange.ts";
 import VueDatePicker from '@vuepic/vue-datepicker';
-import {formatDate} from "../utils/utils.ts";
+import {formatDate, formatDateHijri} from "../utils/utils.ts";
 
 const emit = defineEmits(['update:dateRange']);
 const props = defineProps({
@@ -14,6 +14,10 @@ const props = defineProps({
   selectedDateRange: {
     type: Object as () => DateRange,
     default: null,
+  },
+  calendarType: {
+    type: String,
+    required: true,
   },
 });
 
@@ -61,7 +65,7 @@ const presetDates = ref([
 ]);
 
 const dateRange = ref<[Date, Date]>([new Date(), new Date()]);
-const formatDateOutput = (date: Date[]) => date.map(formatDate).join(' - ');
+const formatDateOutput = (date: Date[]) => date.map(d => props.calendarType === 'gregorian' ? formatDate(d) : formatDateHijri(d)).join(' - ');
 
 function applyDateRange() {
   if (dateRange.value[0] && dateRange.value[1]) {
@@ -76,6 +80,51 @@ onMounted(() => {
   if (props.selectedDateRange) {
     dateRange.value = [props.selectedDateRange.start, props.selectedDateRange.end];
   }
+});
+
+watch(() => props.calendarType, () => {
+  presetDates.value = [
+    {
+      label: 'Last 7 days',
+      value: [subDays(props.validDateRange.end, 7), props.validDateRange.end]
+    },
+    {
+      label: 'Last 14 days',
+      value: [subDays(props.validDateRange.end, 14), props.validDateRange.end]
+    },
+    {
+      label: 'Last 30 days',
+      value: [subDays(props.validDateRange.end, 30), props.validDateRange.end]
+    },
+    {
+      label: 'Last 3 months',
+      value: [subMonths(props.validDateRange.end, 3), props.validDateRange.end]
+    },
+    {
+      label: 'Last 6 months',
+      value: [subMonths(props.validDateRange.end, 6), props.validDateRange.end]
+    },
+    {
+      label: 'Last year',
+      value: [subYears(props.validDateRange.end, 1), props.validDateRange.end]
+    },
+    {
+      label: 'Last 2 years',
+      value: [subYears(props.validDateRange.end, 2), props.validDateRange.end]
+    },
+    {
+      label: 'Last 3 years',
+      value: [subYears(props.validDateRange.end, 3), props.validDateRange.end]
+    },
+    {
+      label: 'Last 5 years',
+      value: [subYears(props.validDateRange.end, 5), props.validDateRange.end]
+    },
+    {
+      label: 'All time',
+      value: [props.validDateRange.start, props.validDateRange.end]
+    },
+  ];
 });
 </script>
 
