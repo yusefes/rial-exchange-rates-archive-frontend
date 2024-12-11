@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {ref, onMounted} from 'vue';
-import {fetchExchangeRates, getDateRange} from './services/exchange-rates.ts';
+import {fetchExchangeRates, getDateRange, fetchExchangeRatesHijri, getDateRangeHijri} from './services/exchange-rates.ts';
 import DateRangeSelector from './components/DateRangeSelector.vue';
 import CurrencySelector from './components/CurrencySelector.vue';
 import ExchangeRateChart from './components/ExchangeRateChart.vue';
@@ -15,17 +15,20 @@ const selectedDateRange = ref<DateRange>({start: new Date(), end: new Date()});
 const loading = ref(true);
 const error = ref<string | null>(null);
 const roiEnabled = ref(false);
+const calendarType = ref('gregorian');
 
 onMounted(async () => {
   try {
-    // fetch exchange rates data
-    const data = await fetchExchangeRates();
+    let data;
+    if (calendarType.value === 'gregorian') {
+      data = await fetchExchangeRates();
+      validDataRange.value = getDateRange(data);
+    } else {
+      data = await fetchExchangeRatesHijri();
+      validDataRange.value = getDateRangeHijri(data);
+    }
     exchangeRates.value = data;
 
-    // finding the date range for the data
-    validDataRange.value = getDateRange(data);
-
-    // set date range to the last month
     const oneMonthAgo = subMonths(validDataRange.value.end, 1);
     selectedDateRange.value = {start: oneMonthAgo, end: validDataRange.value.end};
 
@@ -69,6 +72,13 @@ onMounted(async () => {
               <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer  peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
               <span class="ms-3 text-sm font-medium">ROI Mode</span>
             </label>
+          </div>
+          <div class="flex items-center space-x-4 mt-4">
+            <label for="calendarType" class="text-sm font-medium">Calendar Type:</label>
+            <select id="calendarType" v-model="calendarType" class="rounded border-gray-300">
+              <option value="gregorian">Gregorian</option>
+              <option value="hijri">Solar Hijri</option>
+            </select>
           </div>
         </div>
 
