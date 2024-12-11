@@ -7,6 +7,7 @@ import ExchangeRateChart from './components/ExchangeRateChart.vue';
 import type {DateRange, ExchangeRatesData} from './types/exchange';
 import {LineChart} from 'lucide-vue-next';
 import {subMonths} from "date-fns";
+import { useHead } from '@vueuse/head';
 
 const exchangeRates = ref<ExchangeRatesData>({});
 const validDataRange = ref<DateRange>({start: new Date(), end: new Date()});
@@ -37,6 +38,10 @@ onMounted(async () => {
     error.value = 'Failed to load exchange rates data';
     loading.value = false;
   }
+
+  useHead({
+    title: 'Rial Exchange Rates Archive'
+  });
 });
 
 </script>
